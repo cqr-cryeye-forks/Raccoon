@@ -14,7 +14,8 @@ def start_scan(target: str, file_storage: pathlib.Path):
     print("start program")
     app = subprocess.Popen(
         [
-            'raccoon',
+            'python3',
+            str(ROOT_PATH / "raccoon_src" / "main.py"),
             '--full-scan',
             '--vulners-nmap-scan',
             '--follow-redirects',
