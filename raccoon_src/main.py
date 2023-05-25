@@ -127,15 +127,14 @@ def main(target,
         HelpUtilities.create_output_directory(outdir)
 
         if tor_routing:
-            logger.info("{} Testing that Tor service is up...".format(COLORED_COMBOS.NOTIFY))
+            logger.info("Testing that Tor service is up...")
         elif proxy_list:
             if proxy_list and not os.path.isfile(proxy_list):
                 raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
             else:
-                logger.info("{} Routing traffic using proxies from list {}\n".format(
-                    COLORED_COMBOS.NOTIFY, proxy_list))
+                logger.info("Routing traffic using proxies from list {}".format(proxy_list))
         elif proxy:
-            logger.info("{} Routing traffic through proxy {}\n".format(COLORED_COMBOS.NOTIFY, proxy))
+            logger.info("Routing traffic through proxy")
 
         # TODO: Sanitize delay argument
 
@@ -165,8 +164,7 @@ def main(target,
         if tor_routing:
             try:
                 HelpUtilities.confirm_traffic_routs_through_tor()
-                logger.info("{} Validated Tor service is up. Routing traffic anonymously\n".format(
-                    COLORED_COMBOS.NOTIFY))
+                logger.info("Validated Tor service is up. Routing traffic anonymously\n")
             except RaccoonException as err:
                 print("{}{}{}".format(COLOR.RED, str(err), COLOR.RESET))
                 exit(3)
@@ -174,7 +172,7 @@ def main(target,
         main_loop = asyncio.get_event_loop()
 
         logger.info("{}### Raccoon Scan Started ###{}\n".format(COLOR.GRAY, COLOR.RESET))
-        logger.info("{} Trying to gather information about host: {}".format(COLORED_COMBOS.INFO, target))
+        logger.info("Trying to gather information about host: {}".format(target))
 
         # TODO: Populate array when multiple targets are supported
         # hosts = []
@@ -182,25 +180,25 @@ def main(target,
             host = Host(target=target, dns_records=dns_records)
             host.parse()
         except HostHandlerException as e:
-            logger.critical("{}{}{}".format(COLOR.RED, str(e), COLOR.RESET))
+            logger.critical("{}".format(str(e)))
             exit(11)
 
         if not skip_health_check:
             try:
                 HelpUtilities.validate_target_is_up(host)
             except RaccoonException as err:
-                logger.critical("{}{}{}".format(COLOR.RED, str(err), COLOR.RESET))
+                logger.critical("{}".format(str(err)))
                 exit(42)
 
         if not skip_nmap_scan:
             if vulners_nmap_scan:
-                logger.info("\n{} Setting NmapVulners scan to run in the background".format(COLORED_COMBOS.INFO))
+                logger.info("Setting NmapVulners scan to run in the background")
                 nmap_vulners_scan = NmapVulnersScan(host=host, port_range=port, vulners_path=vulners_path)
                 nmap_thread = threading.Thread(target=VulnersScanner.run, args=(nmap_vulners_scan,))
                 # Run NmapVulners scan in the background
                 nmap_thread.start()
             else:
-                logger.info("\n{} Setting Nmap scan to run in the background".format(COLORED_COMBOS.INFO))
+                logger.info("Setting Nmap scan to run in the background")
                 nmap_scan = NmapScan(
                     host=host,
                     port_range=port,
@@ -246,17 +244,17 @@ def main(target,
 
         if not skip_nmap_scan:
             if nmap_thread.is_alive():
-                logger.info("{} All scans done. Waiting for Nmap scan to wrap up. "
-                            "Time left may vary depending on scan type and port range".format(COLORED_COMBOS.INFO))
+                logger.info("All scans done. Waiting for Nmap scan to wrap up. "
+                            "Time left may vary depending on scan type and port range")
 
                 while nmap_thread.is_alive():
                     time.sleep(15)
 
-        logger.info("\n{}### Raccoon scan finished ###{}\n".format(COLOR.GRAY, COLOR.RESET))
+        logger.info("### Raccoon scan finished ###")
         os.system("stty sane")
 
     except KeyboardInterrupt:
-        print("{}Keyboard Interrupt detected. Exiting{}".format(COLOR.RED, COLOR.RESET))
+        print("Keyboard Interrupt detected. Exiting")
         # Fix F'd up terminal after CTRL+C
         os.system("stty sane")
         exit(42)

@@ -5,7 +5,6 @@ from raccoon_src.utils.web_server_validator import WebServerValidator
 from raccoon_src.lib.storage_explorer import StorageExplorer
 from raccoon_src.utils.request_handler import RequestHandler
 from raccoon_src.utils.help_utils import HelpUtilities
-from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon_src.utils.exceptions import WebAppScannerException, WebServerValidatorException
 from raccoon_src.utils.logger import Logger
 
@@ -39,8 +38,7 @@ class WebApplicationScanner:
         if found:
             try:
                 cms = [a for a in soup.select("a") if "/c/" in a.get("href")][0]
-                self.logger.info("{} CMS detected: target is using {}{}{}".format(
-                    COLORED_COMBOS.GOOD, COLOR.GREEN, cms.get("title"), COLOR.RESET))
+                self.logger.info("CMS detected: target is using {}".format(cms.get("title")))
             except IndexError:
                 if tries >= 4:
                     return
@@ -61,7 +59,7 @@ class WebApplicationScanner:
             try:
                 if domain in self.host.target or self.host.target in domain:
                     if not secure or not http_only:
-                        current = "%s Cookie: {%s} -" % (COLORED_COMBOS.GOOD, key)
+                        current = "Cookie: {%s} -" % key
                         if not secure and not http_only:
                             current += " both secure and HttpOnly flags are not set"
                         elif not secure:
@@ -75,29 +73,28 @@ class WebApplicationScanner:
 
     def _server_info(self):
         if self.headers.get("server"):
-            self.logger.info("{} Web server detected: {}{}{}".format(
-                COLORED_COMBOS.GOOD, COLOR.GREEN, self.headers.get("server"), COLOR.RESET))
+            self.logger.info("Web server detected: {}".format(
+                self.headers.get("server")))
 
     def _x_powered_by(self):
         if self.headers.get("X-Powered-By"):
-            self.logger.info("{} X-Powered-By header detected: {}{}{}".format(
-                COLORED_COMBOS.GOOD, COLOR.GREEN, self.headers.get("X-Powered-By"), COLOR.RESET))
+            self.logger.info("X-Powered-By header detected: {}".format(
+                self.headers.get("X-Powered-By")))
 
     def _anti_clickjacking(self):
         if not self.headers.get("X-Frame-Options"):
             self.logger.info(
-                "{} X-Frame-Options header not detected - target might be vulnerable to clickjacking".format(
-                    COLORED_COMBOS.GOOD)
+                "X-Frame-Options header not detected - target might be vulnerable to clickjacking"
             )
 
     def _xss_protection(self):
         xss_header = self.headers.get("X-XSS-PROTECTION")
         if xss_header and "1" in xss_header:
-            self.logger.info("{} Found X-XSS-PROTECTION header".format(COLORED_COMBOS.BAD))
+            self.logger.info("Found X-XSS-PROTECTION header")
 
     def _cors_wildcard(self):
         if self.headers.get("Access-Control-Allow-Origin") == "*":
-            self.logger.info("{} CORS wildcard detected".format(COLORED_COMBOS.GOOD))
+            self.logger.info("CORS wildcard detected")
 
     def _robots(self):
         res = self.request_handler.send(
@@ -109,7 +106,7 @@ class WebApplicationScanner:
             )
         )
         if res.status_code != 404 and res.text and "<!DOCTYPE html>" not in res.text:
-            self.logger.info("{} Found robots.txt".format(COLORED_COMBOS.GOOD))
+            self.logger.info("Found robots.txt")
             with open("{}/robots.txt".format(self.target_dir), "w") as file:
                 file.write(res.text)
 
@@ -123,7 +120,7 @@ class WebApplicationScanner:
             )
         )
         if res.status_code != 404 and res.text and "<!DOCTYPE html>" not in res.text:
-            self.logger.info("{} Found sitemap.xml".format(COLORED_COMBOS.GOOD))
+            self.logger.info("Found sitemap.xml")
             with open("{}/sitemap.xml".format(self.target_dir), "w") as file:
                 file.write(res.text)
 
@@ -138,13 +135,13 @@ class WebApplicationScanner:
         base_target = "{}://{}:{}".format(self.host.protocol, self.host.target, self.host.port)
         for url in self.fuzzable_urls:
             if url.startswith("/"):
-                self.logger.debug("\t{}{}".format(base_target, url))
+                self.logger.debug("{}{}".format(base_target, url))
             else:
-                self.logger.debug("\t{}".format(url))
+                self.logger.debug("{}".format(url))
 
     def _log_emails(self):
         for email in self.emails:
-            self.logger.debug("\t{}".format(email[7:]))
+            self.logger.debug("{}".format(email[7:]))
 
     def _find_urls(self, soup):
         urls = soup.select("a")
@@ -155,20 +152,18 @@ class WebApplicationScanner:
                     self._analyze_hrefs(href)
 
             if self.fuzzable_urls:
-                self.logger.info("{} {} fuzzable URLs discovered".format(
-                    COLORED_COMBOS.NOTIFY, len(self.fuzzable_urls)))
+                self.logger.info("{} fuzzable URLs discovered".format(len(self.fuzzable_urls)))
                 self._log_fuzzable_urls()
 
             if self.emails:
-                self.logger.info("{} {} email addresses discovered".format(
-                    COLORED_COMBOS.NOTIFY, len(self.emails)))
+                self.logger.info("{} email addresses discovered".format(len(self.emails)))
                 self._log_emails()
 
     def _find_forms(self, soup):
         # TODO: Analyze interesting input names/ids/params
         self.forms = soup.select("form")
         if self.forms:
-            self.logger.info("{} {} HTML forms discovered".format(COLORED_COMBOS.NOTIFY, len(self.forms)))
+            self.logger.info("{} HTML forms discovered".format(len(self.forms)))
             for form in self.forms:
                 form_action = form.get("action")
                 if form_action == "#":
@@ -176,7 +171,7 @@ class WebApplicationScanner:
                 form_id = form.get("id")
                 form_class = form.get("class")
                 form_method = form.get("method")
-                self.logger.debug("\tForm details: ID: {}, Class: {}, Method: {}, action: {}".format(
+                self.logger.debug("Form details: ID: {}, Class: {}, Method: {}, action: {}".format(
                     form_id, form_class, form_method, form_action
                 ))
 
@@ -217,12 +212,12 @@ class WebApplicationScanner:
                                          "Caused due to exception: {}".format(str(e)))
 
     async def run_scan(self):
-        self.logger.info("{} Trying to collect {} web application data".format(COLORED_COMBOS.INFO, self.host))
+        self.logger.info("Trying to collect {} web application data".format(self.host))
         try:
             self.web_server_validator.validate_target_webserver(self.host)
             await self.get_web_application_info()
         except WebServerValidatorException:
             self.logger.info(
-                "{} Target does not seem to have an active web server on port: {}. "
-                "No web application data will be gathered.".format(COLORED_COMBOS.NOTIFY, self.host.port))
+                "Target does not seem to have an active web server on port: {}. "
+                "No web application data will be gathered.".format(self.host.port))
             return

@@ -2,7 +2,6 @@ import re
 from subprocess import PIPE, Popen
 from raccoon_src.utils.help_utils import HelpUtilities
 from raccoon_src.utils.logger import Logger
-from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
 
 
 class NmapScan:
@@ -28,18 +27,18 @@ class NmapScan:
             HelpUtilities.validate_port_range(self.port_range)
             script.append("-p")
             script.append(self.port_range)
-            self.logger.info("{} Added port range {} to Nmap script".format(COLORED_COMBOS.NOTIFY, self.port_range))
+            self.logger.info("Added port range {} to Nmap script".format(self.port_range))
         if self.full_scan:
             script.append("-sV")
             script.append("-sC")
-            self.logger.info("{} Added scripts and services to Nmap script".format(COLORED_COMBOS.NOTIFY))
+            self.logger.info("Added scripts and services to Nmap script")
             return script
         else:
             if self.scripts:
-                self.logger.info("{} Added safe-scripts scan to Nmap script".format(COLORED_COMBOS.NOTIFY))
+                self.logger.info("Added safe-scripts scan to Nmap script")
                 script.append("-sC")
             if self.services:
-                self.logger.info("{} Added service scan to Nmap script".format(COLORED_COMBOS.NOTIFY))
+                self.logger.info("Added service scan to Nmap script")
                 script.append("-sV")
         return script
 
@@ -62,7 +61,7 @@ class NmapVulnersScan(NmapScan):
             HelpUtilities.validate_port_range(self.port_range)
             script.append("-p")
             script.append(self.port_range)
-            self.logger.info("{} Added port range {} to Nmap script".format(COLORED_COMBOS.NOTIFY, self.port_range))
+            self.logger.info("Added port range {} to Nmap script".format(self.port_range))
 
         return script
 
@@ -73,8 +72,8 @@ class Scanner:
     def run(cls, scan):
         script = scan.build_script()
 
-        scan.logger.info("{} Nmap script to run: {}".format(COLORED_COMBOS.INFO, " ".join(script)))
-        scan.logger.info("{} Nmap scan started\n".format(COLORED_COMBOS.GOOD))
+        scan.logger.info("Nmap script to run: {}".format(" ".join(script)))
+        scan.logger.info("Nmap scan started\n")
         process = Popen(
             script,
             stdout=PIPE,
@@ -92,10 +91,10 @@ class Scanner:
         parsed_output = ""
         for line in result.split("\n"):
             if "PORT" in line and "STATE" in line:
-                parsed_output += "{} Nmap discovered the following ports:\n".format(COLORED_COMBOS.GOOD)
+                parsed_output += "Nmap discovered the following ports:\n"
             if "/tcp" in line or "/udp" in line and "open" in line:
                 line = line.split()
-                parsed_output += "\t{}{}{} {}\n".format(COLOR.GREEN, line[0], COLOR.RESET, " ".join(line[1:]))
+                parsed_output += "{} {}".format(line[0],  " ".join(line[1:]))
         return parsed_output
 
     @classmethod
@@ -115,16 +114,16 @@ class VulnersScanner(Scanner):
         parsed_output = ""
         out_versions, out_pure = cls._parse_vulners_output(result)
 
-        out_versions = re.sub(r"(\d+\/(?:tcp|udp))", COLOR.GREEN + r"\1" + COLOR.RESET, out_versions)
-        out_versions = re.sub(r"(\sCVE\S*)", COLOR.RED + r"\1" + COLOR.RESET, out_versions)
-        out_pure = re.sub(r"(\d+\/(?:tcp|udp))", COLOR.GREEN + r"\1" + COLOR.RESET, out_pure)
+        out_versions = re.sub(r"(\d+\/(?:tcp|udp))", r"\1", out_versions)
+        out_versions = re.sub(r"(\sCVE\S*)", r"\1", out_versions)
+        out_pure = re.sub(r"(\d+\/(?:tcp|udp))", r"\1", out_pure)
 
         if out_pure:
-            parsed_output += "{} NmapVulners discovered the following open ports:\n{}"\
-                .format(COLORED_COMBOS.GOOD, out_pure)
+            parsed_output += "NmapVulners discovered the following open ports:\n{}"\
+                .format(out_pure)
         if out_versions:
-            parsed_output += "{} NmapVulners discovered some vulnerable software within the following open ports:\n{}"\
-                .format(COLORED_COMBOS.GOOD, out_versions)
+            parsed_output += "NmapVulners discovered some vulnerable software within the following open ports:\n{}"\
+                .format(out_versions)
         return parsed_output
 
     @classmethod

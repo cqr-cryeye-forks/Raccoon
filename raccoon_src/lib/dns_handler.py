@@ -1,10 +1,8 @@
 from dns import resolver
 from asyncio.subprocess import PIPE, create_subprocess_exec
-from requests.exceptions import ConnectionError
 from raccoon_src.utils.help_utils import HelpUtilities
 from raccoon_src.utils.exceptions import RaccoonException
 from raccoon_src.utils.logger import Logger
-from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
 
 
 # noinspection PyUnboundLocalVariable
@@ -51,26 +49,23 @@ class DNSHandler:
         result, err = await process.communicate()
 
         if process.returncode == 0:
-            logger.info("{} {} WHOIS information retrieved".format(COLORED_COMBOS.GOOD, host))
+            logger.info("{} WHOIS information retrieved".format(host))
             for line in result.decode().strip().split("\n"):
                     if ":" in line:
                         logger.debug(line)
 
     @classmethod
     async def generate_dns_dumpster_mapping(cls, host, sout_logger):
-        sout_logger.info("{} Trying to fetch DNS Mapping for {} from DNS dumpster".format(
-            COLORED_COMBOS.INFO, host))
+        sout_logger.info("Trying to fetch DNS Mapping for {} from DNS dumpster".format(host))
         try:
             page = HelpUtilities.query_dns_dumpster(host=host)
             if page.status_code == 200:
                 path = HelpUtilities.get_output_path("{}/dns_mapping.png".format(host.target))
                 with open(path, "wb") as target_image:
                     target_image.write(page.content)
-                sout_logger.info("{} Successfully fetched DNS mapping for {}".format(
-                    COLORED_COMBOS.GOOD, host.target)
+                sout_logger.info("Successfully fetched DNS mapping for {}".format(host.target)
                 )
             else:
                 raise RaccoonException
         except RaccoonException:
-            sout_logger.info("{} Failed to generate DNS mapping. A connection error occurred.".format(
-                COLORED_COMBOS.BAD))
+            sout_logger.info("Failed to generate DNS mapping. A connection error occurred.")

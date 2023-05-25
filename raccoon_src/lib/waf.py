@@ -2,7 +2,6 @@ from requests.exceptions import TooManyRedirects, ConnectionError
 from raccoon_src.utils.web_server_validator import WebServerValidator
 from raccoon_src.utils.exceptions import WAFException, WebServerValidatorException
 from raccoon_src.utils.request_handler import RequestHandler
-from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon_src.utils.help_utils import HelpUtilities
 from raccoon_src.utils.logger import Logger
 
@@ -101,8 +100,8 @@ class WAF:
 
     def _waf_detected(self, name, where):
         self.logger.info(
-            "{} Detected WAF presence in {}: {}{}{}".format(
-                COLORED_COMBOS.BAD, where, COLOR.RED, name, COLOR.RESET))
+            "Detected WAF presence in {}:{}".format(
+                where, name))
         self.waf_present = True
 
     def _detect_by_cname(self):
@@ -132,7 +131,7 @@ class WAF:
                                "Caused due to exception: {}".format(str(e)))
 
     async def detect(self):
-        self.logger.info("{} Trying to detect WAF presence in {}".format(COLORED_COMBOS.INFO, self.host))
+        self.logger.info("Trying to detect WAF presence")
         if self.cnames:
             self._detect_by_cname()
         try:
@@ -140,8 +139,8 @@ class WAF:
             await self._detect_by_application()
 
             if not self.waf_present:
-                self.logger.info("{} Did not detect WAF presence in target".format(COLORED_COMBOS.GOOD))
+                self.logger.info("Did not detect WAF presence in target")
         except WebServerValidatorException:
             self.logger.info(
-                "{} Target does not seem to have an active web server on port {}. "
-                "No WAF could be detected on an application level.".format(COLORED_COMBOS.NOTIFY, self.host.port))
+                "Target does not seem to have an active web server on port {}. "
+                "No WAF could be detected on an application level.".format(self.host.port))

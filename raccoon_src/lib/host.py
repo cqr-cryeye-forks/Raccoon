@@ -4,7 +4,6 @@ from dns.exception import Timeout
 from raccoon_src.lib.dns_handler import DNSHandler
 from raccoon_src.utils.exceptions import HostHandlerException
 from raccoon_src.utils.help_utils import HelpUtilities
-from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon_src.utils.logger import Logger, SystemOutLogger
 
 
@@ -56,9 +55,9 @@ class Host:
                 raise HostHandlerException("Failed to parse port {}. Is there a path after it ?".format(
                     self.port
                 ))
-            self.logger.info("{} Port detected: {}".format(COLORED_COMBOS.NOTIFY, self.port))
+            self.logger.info("Port detected: {}".format(self.port))
         except IndexError:
-            self.logger.info("{} Did not detect port. Using default port 80".format(COLORED_COMBOS.NOTIFY))
+            self.logger.info("Did not detect port. Using default port 80")
             return
         return
 
@@ -73,12 +72,12 @@ class Host:
         return
 
     def write_up(self):
-        self.logger.info("{} Writing DNS query results".format(COLORED_COMBOS.GOOD, self))
+        self.logger.info("Writing DNS query results")
 
         for record in self.dns_results:
             self.logger.debug(record+"\n")
             for value in self.dns_results.get(record):
-                self.logger.debug("\t{}".format(value))
+                self.logger.debug("{}".format(value))
 
     def create_host_dir_and_set_file_logger(self):
         log_file = HelpUtilities.get_output_path("{}/dns_records.txt".format(self.target))
@@ -95,7 +94,7 @@ class Host:
         if self._is_proto(self.target):
             try:
                 self.protocol, self.target = self.target.split("://")
-                self.logger.info("{} Protocol detected: {}".format(COLORED_COMBOS.NOTIFY, self.protocol))
+                self.logger.info("Protocol detected: {}".format(self.protocol))
                 if self.protocol.lower() == "https" and self.port == 80:
                     self.port = 443
             except ValueError:
@@ -105,7 +104,7 @@ class Host:
             self._extract_port(self.target)
 
         if self.validate_ip(self.target):
-            self.logger.info("{} Detected {} as an IP address.".format(COLORED_COMBOS.NOTIFY, self.target))
+            self.logger.info("Detected {} as an IP address.".format(self.target))
             self.is_ip = True
         else:
             domains = []
@@ -118,7 +117,7 @@ class Host:
                 domains.append(self.target)
                 domain_levels = self.target.split(".")
                 if len(domain_levels) == 2 or (len(domain_levels) == 3 and domain_levels[1] == "co"):
-                    self.logger.info("{} Found {} to be a naked domain".format(COLORED_COMBOS.NOTIFY, self.target))
+                    self.logger.info("Found {} to be a naked domain".format(self.target))
                     self.naked = self.target
 
             try:
@@ -128,8 +127,7 @@ class Host:
 
             if self.dns_results.get("CNAME"):
                 # Naked domains shouldn't hold CNAME records according to RFC regulations
-                self.logger.info("{} Found {} to be an FQDN by CNAME presence in DNS records".format(
-                    COLORED_COMBOS.NOTIFY, self.target))
+                self.logger.info("Found {} to be an FQDN by CNAME presence in DNS records".format(self.target))
 
                 self.fqdn = self.target
                 self.naked = ".".join(self.fqdn.split('.')[1:])

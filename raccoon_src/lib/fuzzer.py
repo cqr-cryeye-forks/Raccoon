@@ -137,17 +137,16 @@ class URLFuzzer:
             self._rule_out_false_positives(response_codes, sub_domain)
 
             if not sub_domain:
-                self.logger.info("{} Fuzzing URLs".format(COLORED_COMBOS.INFO))
-            self.logger.info("{} Reading from list: {}".format(COLORED_COMBOS.INFO, self.path_to_wordlist))
+                self.logger.info("Fuzzing URLs")
             pool = ThreadPool(self.num_threads)
             pool.map(partial(self._fetch, sub_domain=sub_domain), self.wordlist)
             pool.close()
             pool.join()
             if not sub_domain:
-                self.logger.info("{} Done fuzzing URLs".format(COLORED_COMBOS.INFO))
+                self.logger.info("Done fuzzing URLs")
         except FuzzerException as e:
-            self.logger.info("{} {}".format(COLORED_COMBOS.BAD, e))
+            self.logger.info("{}".format(e))
         except ConnectionError as e:
             if "Remote end closed connection without response" in str(e):
-                self.logger.info("{} {}. Target is actively closing connections - will not "
-                                 "bruteforce URLs".format(COLORED_COMBOS.BAD, str(e)))
+                self.logger.info("{}. Target is actively closing connections - will not "
+                                 "bruteforce URLs".format(str(e)))

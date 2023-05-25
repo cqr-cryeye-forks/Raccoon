@@ -1,8 +1,7 @@
 import os
 import xmltodict
 from raccoon_src.utils.request_handler import RequestHandler
-from raccoon_src.utils.exceptions import RaccoonException, RequestHandlerException
-from raccoon_src.utils.coloring import COLORED_COMBOS, COLOR
+from raccoon_src.utils.exceptions import RequestHandlerException
 
 
 # Set path for relative access to builtin files.
@@ -78,8 +77,7 @@ class AmazonS3Handler(Storage):
                 res = self.request_handler.send("GET", url=HTTPS+url)
 
                 if res.status_code == 200 and res.headers.get("Content-Type") == "application/xml":
-                    self.logger.info("{} Vulnerable S3 bucket detected: {}{}{}. Enumerating sensitive files".format(
-                        COLORED_COMBOS.GOOD, COLOR.RED, url, COLOR.RESET))
+                    self.logger.info("Vulnerable S3 bucket detected: {}. Enumerating sensitive files".format(url))
                     bucket.vulnerable = True
                     self._scan_for_sensitive_files(res.text, url)
 
@@ -164,7 +162,7 @@ class StorageExplorer(AmazonS3Handler, GoogleStorageHandler, AzureStorageHandler
         for url in urls:
             self._add_to_found_storage(url)
         if self.s3_buckets:
-            self.logger.info("{} S3 buckets discovered. Testing for permissions".format(COLORED_COMBOS.NOTIFY))
+            self.logger.info("S3 buckets discovered. Testing for permissions")
             for bucket in self.s3_buckets:
                 if bucket.no_scheme_url in self.storage_urls_found:
                     continue
@@ -173,10 +171,9 @@ class StorageExplorer(AmazonS3Handler, GoogleStorageHandler, AzureStorageHandler
 
             if self.num_files_found > 0:
                 self.logger.info(
-                    "{} Found {}{}{} sensitive files in S3 buckets. inspect web scan logs for more information.".format(
-                        COLORED_COMBOS.GOOD, COLOR.GREEN, self.num_files_found, COLOR.RESET))
+                    "Found {} sensitive files in S3 buckets. inspect web scan logs for more information.".format(self.num_files_found))
             elif any(b.vulnerable for b in self.s3_buckets):
-                self.logger.info("{} No sensitive files found in target's cloud storage".format(COLORED_COMBOS.BAD))
+                self.logger.info("No sensitive files found in target's cloud storage")
             else:
-                self.logger.info("{} Could not access target's cloud storage."
-                                 " All permissions are set properly".format(COLORED_COMBOS.BAD))
+                self.logger.info("Could not access target's cloud storage."
+                                 " All permissions are set properly")
