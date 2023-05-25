@@ -22,7 +22,7 @@ def start_scan(target: str, file_storage: pathlib.Path):
             file_storage.absolute(),
             target,
         ],
-        cwd=ROOT_PATH,
+        # cwd=ROOT_PATH,
     )
     app.communicate()
     print("end program")
