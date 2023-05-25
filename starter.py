@@ -18,11 +18,11 @@ def start_scan(target: str, file_storage: pathlib.Path):
             '--full-scan',
             '--vulners-nmap-scan',
             '--follow-redirects',
-            "-o",
-            file_storage.absolute(),
+            # "-o",
+            # file_storage.absolute(),
             target,
         ],
-        # cwd=ROOT_PATH,
+        cwd=ROOT_PATH,
     )
     app.communicate()
     print("end program")
