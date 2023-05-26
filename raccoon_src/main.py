@@ -169,7 +169,9 @@ def main(target,
                 print("{}{}{}".format(COLOR.RED, str(err), COLOR.RESET))
                 exit(3)
 
-        main_loop = asyncio.get_event_loop()
+        # main_loop = asyncio.get_event_loop()
+        main_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop=main_loop)
 
         logger.info("{}### Raccoon Scan Started ###{}\n".format(COLOR.GRAY, COLOR.RESET))
         logger.info("Trying to gather information about host: {}".format(target))
