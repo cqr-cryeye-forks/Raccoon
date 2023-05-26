@@ -186,8 +186,8 @@ def main(target: str, file_storage: pathlib.Path):
                     waf_name = line.split(":")[1].strip()
                     break
 
-            WAF_RESULTS = [{"WAF": waf_name, "Detected": detected_waf}] if detected_waf else [
-                {"WAF": None, "Detected": False}]
+            WAF_RESULTS = {"WAF": waf_name, "Detected": detected_waf} if detected_waf \
+                else {"WAF": None, "Detected": False}
 
             final_result["WAF_RESULTS"] = WAF_RESULTS
 
