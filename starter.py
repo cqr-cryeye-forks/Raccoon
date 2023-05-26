@@ -144,7 +144,7 @@ def main(target: str, file_storage: pathlib.Path):
                 # Extract data between "TLSv" objects
                 for i, tls_obj in enumerate(tls_objects):
                     supported_cipher = {}
-                    supported_cipher["supported_cipher"] = tls_obj.replace(":", "")
+                    supported_cipher["supported_cipher"] = tls_obj.replace(":", "").strip()
 
                     if i < len(tls_objects) - 1:
                         start_index = cleaned_lines.index(tls_obj) + 1
