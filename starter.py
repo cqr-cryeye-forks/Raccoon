@@ -52,7 +52,7 @@ def main(target: str, file_storage: pathlib.Path):
     path_to_results: pathlib.Path = file_storage.joinpath(domain)
     all_files_content_as_dict: list[dict] = []
 
-    final_result = []
+    final_result = {}
 
     for file in path_to_results.iterdir():
         if file.suffix != ".txt":
@@ -73,7 +73,7 @@ def main(target: str, file_storage: pathlib.Path):
                     url = match.group()
                     FUZZING_RESULTS.append({"url": url})
 
-            final_result += [{"FUZZING_RESULTS": FUZZING_RESULTS}]
+            final_result["FUZZING_RESULTS"] = FUZZING_RESULTS
 
         elif scan_name == 'nmap_vulners_scan':
             lines = file_content.split('\n')
@@ -117,7 +117,7 @@ def main(target: str, file_storage: pathlib.Path):
                             result_dict.update(vulners_dict)
                             NMAP_RESULTS.append(result_dict)
 
-            final_result += [{"NMAP_RESULTS": NMAP_RESULTS}]
+            final_result["NMAP_RESULTS"] = NMAP_RESULTS
 
         elif scan_name == 'tls_report':
             lines = file_content.split('\n')
@@ -173,7 +173,7 @@ def main(target: str, file_storage: pathlib.Path):
                     supported_cipher["warnings"] = warnings
                     TLS_RESULTS.append(supported_cipher)
 
-            final_result += [{"TLS_RESULTS": TLS_RESULTS}]
+            final_result["TLS_RESULTS"] = TLS_RESULTS
 
         elif scan_name == 'WAF':
             lines = file_content.split('\n')
@@ -189,7 +189,7 @@ def main(target: str, file_storage: pathlib.Path):
             WAF_RESULTS = [{"WAF": waf_name, "Detected": detected_waf}] if detected_waf else [
                 {"WAF": None, "Detected": False}]
 
-            final_result += [{"WAF_RESULTS": WAF_RESULTS}]
+            final_result["WAF_RESULTS"] = WAF_RESULTS
 
         elif scan_name == 'web_scan':
             lines = file_content.split('\n')
@@ -252,7 +252,7 @@ def main(target: str, file_storage: pathlib.Path):
             else:
                 WEB_SCAN_RESULTS["Fuzzable URLs discovered"] = []
 
-            final_result += [{"WEB_SCAN_RESULTS": WEB_SCAN_RESULTS}]
+            final_result["WEB_SCAN_RESULTS"] = WEB_SCAN_RESULTS
 
         elif scan_name == 'robots':
             lines = file_content.split('\n')
@@ -268,7 +268,7 @@ def main(target: str, file_storage: pathlib.Path):
                     result_dict = {"Allow": path}
                     ROBOTS_TXT_RESULTS.append(result_dict)
 
-            final_result += [{"ROBOTS_TXT_RESULTS": ROBOTS_TXT_RESULTS}]
+            final_result["ROBOTS_TXT_RESULTS"] = ROBOTS_TXT_RESULTS
 
         elif scan_name == 'subdomain_fuzz':
             lines = file_content.split('\n')
@@ -280,8 +280,7 @@ def main(target: str, file_storage: pathlib.Path):
                     url = match.group()
                     SUBDOMAINS_RESULTS.append({"url": url})
 
-            final_result += [{"SUBDOMAINS_RESULTS": SUBDOMAINS_RESULTS}]
-        z = 1
+            final_result["SUBDOMAINS_RESULTS"] = SUBDOMAINS_RESULTS
 
         clear_text_from_file = text_cleaner(text=file_content)
         clear_text_as_lines = clear_text_from_file.splitlines()
