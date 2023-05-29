@@ -206,7 +206,7 @@ def main(target: str, file_storage: pathlib.Path):
                 _, web_server = web_server_line.split(":")
                 WEB_SCAN_RESULTS["Web_server_detected"] = web_server.strip()
             else:
-                WEB_SCAN_RESULTS["Web_server_detected"] = False
+                WEB_SCAN_RESULTS["Web_server_detected"] = None
 
             powered_by_header_line = next((line for line in lines if "X-Powered-By header detected" in line), None)
             if powered_by_header_line:
