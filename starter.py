@@ -104,15 +104,16 @@ def main(target: str, file_storage: pathlib.Path):
                                 "VERSION": version
                             }
 
-                            vulners_dict = {"vulners": {"url_vuln": []}}
+                            vulners_dict = {"vulners": {"list_url_vulns": []}}
+
                             if vulners_index is not None and vulners_index < service_detection_index:
                                 vulners_urls = []
                                 for line in lines[vulners_index + 1:service_detection_index]:
                                     if "http://" in line or "https://" in line:
                                         url = re.search(r"(https?://\S+)", line).group(1)
-                                        vulners_urls.append(url)
+                                        vulners_urls.append({"url_vuln": url})
 
-                                vulners_dict = {"vulners": {"url_vuln": vulners_urls}}
+                                vulners_dict = {"vulners": {"list_url_vulns": vulners_urls}}
 
                             result_dict.update(vulners_dict)
                             NMAP_RESULTS.append(result_dict)
@@ -136,8 +137,7 @@ def main(target: str, file_storage: pathlib.Path):
             TLS_RESULTS = []
 
             if any("Could not obtain any TLS data from target" in line for line in cleaned_lines):
-                TLS_RESULTS = []
-                final_result += TLS_RESULTS
+                final_result['TLS_RESULTS'] = []
             else:
                 tls_objects = [line for line in cleaned_lines if line.startswith('TLSv') or line.startswith('SSLv')]
 
@@ -261,11 +261,11 @@ def main(target: str, file_storage: pathlib.Path):
             for line in lines:
                 if "Disallow:" in line:
                     path = line.split("Disallow:")[1].strip()
-                    result_dict = {"Disallow": path}
+                    result_dict = {"status": "Disallow", "path": path}
                     ROBOTS_TXT_RESULTS.append(result_dict)
                 elif "Allow:" in line:
                     path = line.split("Allow:")[1].strip()
-                    result_dict = {"Allow": path}
+                    result_dict = {"status": "Allow", "path": path}
                     ROBOTS_TXT_RESULTS.append(result_dict)
 
             final_result["ROBOTS_TXT_RESULTS"] = ROBOTS_TXT_RESULTS
@@ -294,8 +294,8 @@ def main(target: str, file_storage: pathlib.Path):
         # remove parsed file
         file.unlink(missing_ok=True)
 
-    # path_to_result_file_1: pathlib.Path = ROOT_PATH.joinpath("final.json")
-    # path_to_result_file_1.write_text(json.dumps(all_files_content_as_dict))
+    path_to_result_file_1: pathlib.Path = ROOT_PATH.joinpath("final.json")
+    path_to_result_file_1.write_text(json.dumps(all_files_content_as_dict))
 
     path_to_result_file: pathlib.Path = ROOT_PATH.joinpath("result.json")
     path_to_result_file.write_text(json.dumps(final_result))
