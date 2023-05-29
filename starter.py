@@ -52,7 +52,8 @@ def main(target: str, file_storage: pathlib.Path):
     path_to_results: pathlib.Path = file_storage.joinpath(domain)
     all_files_content_as_dict: list[dict] = []
 
-    final_result = {}
+    final_result = {"FUZZING_RESULTS": [], "NMAP_RESULTS": [], "TLS_RESULTS": [], "WAF_RESULTS": {},
+                    "SUBDOMAINS_RESULTS": [], "ROBOTS_TXT_RESULTS": [], "WEB_SCAN_RESULTS": {}}
 
     for file in path_to_results.iterdir():
         if file.suffix != ".txt":
@@ -197,31 +198,31 @@ def main(target: str, file_storage: pathlib.Path):
             WEB_SCAN_RESULTS = {}
             # Check if "Found robots.txt" is present
             found_robots_txt = any("Found robots.txt" in line for line in lines)
-            WEB_SCAN_RESULTS["Found robots.txt"] = found_robots_txt
+            WEB_SCAN_RESULTS["Found_robots_txt"] = found_robots_txt
 
             # Check if "Web server detected" is present and extract the value
             web_server_line = next((line for line in lines if "Web server detected" in line), None)
             if web_server_line:
                 _, web_server = web_server_line.split(":")
-                WEB_SCAN_RESULTS["Web server detected"] = web_server.strip()
+                WEB_SCAN_RESULTS["Web_server_detected"] = web_server.strip()
             else:
-                WEB_SCAN_RESULTS["Web server detected"] = False
+                WEB_SCAN_RESULTS["Web_server_detected"] = False
 
             powered_by_header_line = next((line for line in lines if "X-Powered-By header detected" in line), None)
             if powered_by_header_line:
                 _, powered_by_header = powered_by_header_line.split(":")
-                WEB_SCAN_RESULTS["X-Powered-By header detected"] = powered_by_header.strip()
+                WEB_SCAN_RESULTS["X-Powered-By_header_detected"] = powered_by_header.strip()
             else:
-                WEB_SCAN_RESULTS["X-Powered-By header detected"] = False
+                WEB_SCAN_RESULTS["X-Powered-By_header_detected"] = False
 
             # Check if "X-Frame-Options header not detected" is present
             x_frame_options_not_detected = any("X-Frame-Options header not detected" in line for line in lines)
             if x_frame_options_not_detected:
-                WEB_SCAN_RESULTS["X-Frame-Options header detected"] = False
-                WEB_SCAN_RESULTS["X-Frame-Options Info"] = "Might be vulnerable to clickjacking"
+                WEB_SCAN_RESULTS["X-Frame-Options_header_detected"] = False
+                WEB_SCAN_RESULTS["X-Frame-Options_Info"] = "Might be vulnerable to clickjacking"
             else:
-                WEB_SCAN_RESULTS["X-Frame-Options header detected"] = True
-                WEB_SCAN_RESULTS["X-Frame-Options Info"] = "not vulnerable to clickjacking"
+                WEB_SCAN_RESULTS["X-Frame-Options_header_detected"] = True
+                WEB_SCAN_RESULTS["X-Frame-Options_Info"] = "not vulnerable to clickjacking"
 
             # Check if "Cookie:" is present and extract the value
             result_list = []
@@ -232,7 +233,7 @@ def main(target: str, file_storage: pathlib.Path):
                     cookie_info = cookie_info[1].strip() if len(cookie_info) > 1 else None
                     result_dict = {
                         "Cookie": cookie,
-                        "Cookie Info": cookie_info
+                        "Cookie_Info": cookie_info
                     }
                     result_list.append(result_dict)
 
@@ -247,10 +248,10 @@ def main(target: str, file_storage: pathlib.Path):
                         if match:
                             url = match.group()
                             urls.append({"url": url})
-                    WEB_SCAN_RESULTS["Fuzzable URLs discovered"] = urls
+                    WEB_SCAN_RESULTS["Fuzzable_URLs_discovered"] = urls
                     break
             else:
-                WEB_SCAN_RESULTS["Fuzzable URLs discovered"] = []
+                WEB_SCAN_RESULTS["Fuzzable_URLs_discovered"] = []
 
             final_result["WEB_SCAN_RESULTS"] = WEB_SCAN_RESULTS
 
@@ -294,8 +295,9 @@ def main(target: str, file_storage: pathlib.Path):
         # remove parsed file
         file.unlink(missing_ok=True)
 
-    path_to_result_file_1: pathlib.Path = ROOT_PATH.joinpath("final.json")
-    path_to_result_file_1.write_text(json.dumps(all_files_content_as_dict))
+
+    # path_to_result_file_1: pathlib.Path = ROOT_PATH.joinpath("final.json")
+    # path_to_result_file_1.write_text(json.dumps(all_files_content_as_dict))
 
     path_to_result_file: pathlib.Path = ROOT_PATH.joinpath("result.json")
     path_to_result_file.write_text(json.dumps(final_result))
