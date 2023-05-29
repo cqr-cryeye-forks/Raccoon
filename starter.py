@@ -299,6 +299,7 @@ def main(target: str, file_storage: pathlib.Path):
     # path_to_result_file_1: pathlib.Path = ROOT_PATH.joinpath("final.json")
     # path_to_result_file_1.write_text(json.dumps(all_files_content_as_dict))
 
+
     path_to_result_file: pathlib.Path = ROOT_PATH.joinpath("result.json")
     path_to_result_file.write_text(json.dumps(final_result))
 
