@@ -213,7 +213,7 @@ def main(target: str, file_storage: pathlib.Path):
                 _, powered_by_header = powered_by_header_line.split(":")
                 WEB_SCAN_RESULTS["X-Powered-By_header_detected"] = powered_by_header.strip()
             else:
-                WEB_SCAN_RESULTS["X-Powered-By_header_detected"] = False
+                WEB_SCAN_RESULTS["X-Powered-By_header_detected"] = None
 
             # Check if "X-Frame-Options header not detected" is present
             x_frame_options_not_detected = any("X-Frame-Options header not detected" in line for line in lines)
